@@ -1,8 +1,9 @@
 ---
+import { getSession } from 'auth-astro/server';
 import { signIn, signOut } from '../auth';
 
 // Get the current session
-const session = await Astro.locals.auth();
+const session = await getSession(Astro.request);
 const user = session?.user;
 ---
 

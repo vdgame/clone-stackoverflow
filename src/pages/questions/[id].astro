@@ -8,6 +8,7 @@ import CommentList from '../../components/CommentList.astro';
 import BookmarkButton from '../../components/BookmarkButton.astro';
 import VoteButton from '../../components/VoteButton.astro';
 import ReputationCard from '../../components/ReputationCard.astro';
+import { getSession } from 'auth-astro/server';
 
 // Mock question data (in a real app this would come from a database)
 export function getStaticPaths() {
@@ -25,7 +26,7 @@ const { questionId } = Astro.props;
 const showAllComments = Astro.url.searchParams.get('show') === 'all';
 
 // Get the current session (in a real app)
-const session = await Astro.locals.auth();
+const session = await getSession(Astro.request);
 const isLoggedIn = !!session;
 
 // Mock bookmark state

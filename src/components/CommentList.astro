@@ -1,5 +1,6 @@
 ---
 import Comment from './Comment.astro';
+import { getSession } from 'auth-astro/server';
 
 export interface Props {
   comments: Array<{
@@ -21,12 +22,10 @@ export interface Props {
 
 const { comments, parentType, parentId, showAllComments = false } = Astro.props;
 
-// Only show first 5 comments by default unless showAllComments is true
 const visibleComments = showAllComments ? comments : comments.slice(0, 5);
 const hasMoreComments = comments.length > 5 && !showAllComments;
 
-// Get current session to check if user is logged in
-const session = await Astro.locals.auth();
+const session = await getSession(Astro.request);
 const isLoggedIn = !!session;
 ---
 

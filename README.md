@@ -1,48 +1,143 @@
-# Astro Starter Kit: Basics
+# Stack Overflow Clone
 
-```sh
-npm create astro@latest -- --template basics
+A modern Stack Overflow clone built with Astro v5 and Tailwind CSS, providing a responsive and feature-rich Q&A platform.
+
+## Features
+
+- Responsive design that works on mobile, tablet, and desktop
+- Dark mode support with automatic system preference detection
+- User authentication with GitHub OAuth
+- Question listing with search and filtering
+- Question detail pages with answers and comments
+- Voting system with reputation points
+- Bookmarking functionality
+- Real-time notifications
+- Advanced search with multiple filters
+- Keyboard shortcuts for power users
+
+## Technology Stack
+
+- **Framework**: Astro v5 with Server-Side Rendering (SSR)
+- **Styling**: Tailwind CSS v3
+- **Authentication**: Auth.js via auth-astro integration
+- **Deployment**: Netlify with SSR adapter
+
+## Authentication Architecture
+
+This project uses [Auth.js](https://authjs.dev/) via the [auth-astro](https://github.com/nowaythatworked/auth-astro) integration to handle authentication.
+
+### Key Components
+
+1. **`auth.config.ts`**: Contains the authentication configuration, including providers (GitHub OAuth) and session settings.
+
+2. **`src/auth.ts`**: Exports helper functions for authentication, including `signIn` and `signOut` URL generators.
+
+3. **API Endpoints**: Authentication endpoints are automatically created at `/api/auth/[...auth]` by the auth-astro integration.
+
+4. **Session Management**: Sessions are retrieved using the `getSession()` function from `auth-astro/server`.
+
+### Authentication Flow
+
+1. User clicks "Login" which redirects to `/api/auth/signin` with the provider parameter
+2. After authenticating with the provider (GitHub), the user is redirected back to the callback URL
+3. Auth.js creates a session and sets cookies
+4. The user is redirected to the homepage or original destination
+
+### Usage in Components
+
+To access the current user session in a component or page:
+
+```astro
+---
+import { getSession } from 'auth-astro/server';
+
+// Get the current session
+const session = await getSession(Astro.request);
+const user = session?.user;
+---
+
+{user ? (
+  <p>Welcome, {user.name}!</p>
+) : (
+  <p>Please log in</p>
+)}
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+### Protected Routes
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+To create protected routes that require authentication:
 
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
+```astro
+---
+import { getSession } from 'auth-astro/server';
 
-## 🚀 Project Structure
+// Get the current session
+const session = await getSession(Astro.request);
 
-Inside of your Astro project, you'll see the following folders and files:
+// Redirect if not logged in
+if (!session) {
+  return Astro.redirect('/users/login?redirect=' + Astro.url.pathname);
+}
+---
+```
+
+### Environment Variables
+
+Authentication requires the following environment variables:
+
+- `AUTH_SECRET`: A secret key used to encrypt cookies (generate with `openssl rand -hex 32`)
+- `AUTH_TRUST_HOST`: Set to `true` for proper handling of cookies in production
+- `GITHUB_CLIENT_ID`: OAuth Client ID from GitHub Developer settings
+- `GITHUB_CLIENT_SECRET`: OAuth Client Secret from GitHub Developer settings
+
+## Project Structure
 
 ```text
 /
 ├── public/
 │   └── favicon.svg
 ├── src/
+│   ├── components/
+│   │   ├── AuthButton.astro  # Login/logout button component
+│   │   ├── Header.astro
+│   │   ├── Footer.astro
+│   │   └── ...
 │   ├── layouts/
 │   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
+│   ├── pages/
+│   │   ├── index.astro
+│   │   ├── questions/
+│   │   │   ├── index.astro   # Questions list page
+│   │   │   ├── [id].astro    # Question detail page
+│   │   │   └── ask.astro     # Ask question page
+│   │   ├── api/
+│   │   │   ├── auth/         # Auth.js API endpoints
+│   │   │   ├── notifications/ # Notification endpoints
+│   │   │   ├── vote/         # Voting endpoints
+│   │   │   └── ...
+│   │   └── ...
+│   ├── scripts/
+│   │   └── keyboard-shortcuts.js
+│   ├── styles/
+│   │   └── global.css
+│   └── auth.ts               # Auth helpers
+├── auth.config.ts            # Auth.js configuration
+├── astro.config.mjs          # Astro configuration
 └── package.json
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## Getting Started
 
-## 🧞 Commands
+1. Clone the repository
+2. Create a `.env` file based on `.env.example`
+3. Install dependencies: `bun install`
+4. Start the development server: `bun run dev`
 
-All commands are run from the root of the project, from a terminal:
+## Commands
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+| Command           | Action                                           |
+| :---------------- | :----------------------------------------------- |
+| `bun install`     | Installs dependencies                            |
+| `bun run dev`     | Starts local dev server at `localhost:4321`      |
+| `bun run build`   | Build your production site to `./dist/`          |
+| `bun run preview` | Preview your build locally, before deploying     |

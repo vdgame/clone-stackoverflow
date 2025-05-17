@@ -3,6 +3,7 @@ import Layout from '../../../layouts/Layout.astro';
 import Header from '../../../components/Header.astro';
 import Footer from '../../../components/Footer.astro';
 import Comment from '../../../components/Comment.astro';
+import { getSession } from 'auth-astro/server';
 
 // For static site generation, we need to generate a default version
 export const prerender = false;
@@ -186,7 +187,7 @@ if (type === 'question') {
 }
 
 // Get current session to check if user is logged in
-const session = await Astro.locals.auth();
+const session = await getSession(Astro.request);
 const isLoggedIn = !!session;
 
 // Sort comments by most upvotes by default
